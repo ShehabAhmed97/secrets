@@ -8,7 +8,7 @@ const mongoose = require("mongoose");
 mongoose.connect("mongodb://localhost:27017/secretsDB");
 
 //=================Encryption================//
-const md5 = require("md5");
+const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema({
     email: String,
     password: String
@@ -41,9 +41,11 @@ app.route("/login")
                console.log(err)
            }else{
                if(user){
-                   if(user.password === md5(req.body.password)){
-                       res.render("secrets")
-                   }
+                bcrypt.compare(req.body.password, user.password, function(err, result) {
+                    if(result === true){
+                        res.render("secrets")
+                    } 
+                });
                }
            }
        }) 
@@ -54,17 +56,19 @@ app.route("/register")
        res.render("register");
        })
     .post((req,res) => {
-        const newUser = new User({
-            email: req.body.username,
-            password: md5(req.body.password)
+        bcrypt.hash(req.body.password, 10, function(err, hash) {
+            const newUser = new User({
+                email: req.body.username,
+                password: hash
+            });
+            newUser.save((err) => {
+                if(!err){
+                    res.render("secrets");
+                }else{
+                    console.log(err);
+                }
+            })
         });
-        newUser.save((err) => {
-            if(!err){
-                res.render("secrets");
-            }else{
-                console.log(err);
-            }
-        })
     })   
 
 app.listen(process.env.PORT || 3000, ()=>{
