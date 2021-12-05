@@ -98,7 +98,11 @@ app.route("/login")
    .get((req,res) => {
        res.render("login");
        })
-   .post(passport.authenticate("local", { successRedirect: '/secrets',failureRedirect: '/login', failureFlash: 'Invalid username or password.' })
+   .post(passport.authenticate("local",
+                                {   successRedirect: '/secrets',
+                                    failureRedirect: '/login',
+                                    failureFlash: 'Invalid username or password.'
+                                })
     // (req,res) => {
     //     const user = new User({
     //         username: req.body.username,
